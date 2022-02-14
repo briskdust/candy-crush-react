@@ -1,8 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 
+import blank from "./images/blank.png";
+import blueCandy from "./images/blue-candy.png";
+import greenCandy from "./images/green-candy.png";
+import orangeCandy from "./images/orange-candy.png";
+import purpleCandy from "./images/purple-candy.png";
+import redCandy from "./images/red-candy.png";
+import yellowCandy from "./images/yellow-candy.png";
+
 const width = 8;
 const height = 8;
-const candyColors = ["blue", "green", "orange", "purple", "red", "yellow"];
+const candyColors = [
+  blueCandy,
+  greenCandy,
+  orangeCandy,
+  purpleCandy,
+  redCandy,
+  yellowCandy,
+];
 
 const App = () => {
   const [currentColorArr, setColorArr] = useState([]);
@@ -15,7 +30,7 @@ const App = () => {
       const decide = currentColorArr[i];
 
       if (colOfFour.every(num => currentColorArr[num] === decide)) {
-        colOfFour.forEach(num => (currentColorArr[num] = ""));
+        colOfFour.forEach(num => (currentColorArr[num] = blank));
       }
     }
   }, [currentColorArr]);
@@ -26,7 +41,7 @@ const App = () => {
       const decide = currentColorArr[i];
 
       if (colOfThree.every(num => currentColorArr[num] === decide)) {
-        colOfThree.forEach(num => (currentColorArr[num] = ""));
+        colOfThree.forEach(num => (currentColorArr[num] = blank));
       }
     }
   }, [currentColorArr]);
@@ -44,7 +59,7 @@ const App = () => {
       const decide = currentColorArr[i];
 
       if (rowOfFour.every(num => currentColorArr[num] === decide)) {
-        rowOfFour.forEach(num => (currentColorArr[num] = ""));
+        rowOfFour.forEach(num => (currentColorArr[num] = blank));
       }
     }
   }, [currentColorArr]);
@@ -61,7 +76,7 @@ const App = () => {
       const decide = currentColorArr[i];
 
       if (rowOfThree.every(num => currentColorArr[num] === decide)) {
-        rowOfThree.forEach(num => (currentColorArr[num] = ""));
+        rowOfThree.forEach(num => (currentColorArr[num] = blank));
       }
     }
   }, [currentColorArr]);
@@ -69,17 +84,14 @@ const App = () => {
   // no need to update the state here, because the app component will be re-rendered anyway
   const dropCandies = useCallback(() => {
     for (let i = 0; i < 64 - width; i++) {
-      const firstRow = [0, 1, 2, 3, 4, 5, 6, 7];
-      const isFirstRow = firstRow.includes(i);
-
-      if (isFirstRow && currentColorArr[i] === "") {
+      if (i < 8 && currentColorArr[i] === blank) {
         const randomColor = Math.floor(Math.random() * candyColors.length);
         currentColorArr[i] = candyColors[randomColor];
       }
 
-      if (currentColorArr[i + width] === "") {
+      if (currentColorArr[i + width] === blank) {
         currentColorArr[i + width] = currentColorArr[i];
-        currentColorArr[i] = "";
+        currentColorArr[i] = blank;
       }
     }
   }, [currentColorArr]);
@@ -95,8 +107,18 @@ const App = () => {
   const dragEnd = event => {
     const pickId = parseInt(pickedCandy.getAttribute("id"));
     const dropId = parseInt(droppedCandy.getAttribute("id"));
-    console.log(`picked candy: ${pickedCandy}`);
-    console.log(`droped candy: ${droppedCandy}`);
+
+    const validMoves = [pickId - 1, pickId + 1, pickId - width, pickId + width];
+
+    (() => {
+      if (!validMoves.includes(dropId)) return;
+
+      if ((pickId + 1) % 8 === 0 && dropId === pickId + 1) return;
+      if (pickId % 8 === 0 && dropId === pickId - 1) return;
+
+      currentColorArr[pickId] = droppedCandy.getAttribute("src");
+      currentColorArr[dropId] = pickedCandy.getAttribute("src");
+    })();
   };
 
   const createBoard = () => {
@@ -135,13 +157,12 @@ const App = () => {
 
   return (
     <div className="app">
-      <div className="game">
+      <div className="board">
         {currentColorArr.map((candy, idx) => {
           return (
             <img
               key={idx}
-              style={{ backgroundColor: candy }}
-              src=""
+              src={candy}
               alt={candy}
               id={idx}
               draggable={true}
