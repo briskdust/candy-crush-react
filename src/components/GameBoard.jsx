@@ -1,10 +1,11 @@
 import useGameLogic from "../hooks/useGameLogic";
+import Board from "../styles/Board.styled";
 
 const GameBoard = () => {
   const [currentColorArr, dragStart, dragDrop, dragEnd] = useGameLogic();
 
   return (
-    <div className="board">
+    <Board>
       {currentColorArr.map((candy, idx) => {
         return (
           <img
@@ -22,7 +23,7 @@ const GameBoard = () => {
           />
         );
       })}
-    </div>
+    </Board>
   );
 };
 
